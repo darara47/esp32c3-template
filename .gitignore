@@ -1,0 +1,21 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.iml
+
+# Dart / Flutter (per-package .gitignore covers the rest; this catches the
+# workspace-root artifacts pub workspaces produce)
+.dart_tool/
+.melos_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# ESP-IDF (firmware/* projects, added ahead of M1)
+firmware/**/build/
+firmware/**/sdkconfig
+firmware/**/sdkconfig.old
+firmware/**/managed_components/
+firmware/**/dependencies.lock

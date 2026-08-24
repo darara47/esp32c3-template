@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ledctl.local/schema/device.schema.json",
+  "title": "Device descriptor",
+  "description": "Deskryptor zdolności urządzenia. Zwracany przez GET /api/device oraz jako pierwsza ramka po handshake WebSocket.",
+  "type": "object",
+  "required": ["schema", "id", "name", "model", "caps"],
+  "properties": {
+    "schema": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Wersja schematu protokołu. Klient odrzuca wersje wyższe niż obsługiwane."
+    },
+    "id": {
+      "type": "string",
+      "description": "Trwały identyfikator urządzenia, zwykle adres MAC."
+    },
+    "name": { "type": "string", "maxLength": 64 },
+    "model": {
+      "type": "string",
+      "examples": ["ledctl-cct", "ledctl-pixels", "wled"]
+    },
+    "fw": { "type": "string", "description": "Wersja firmware (semver)." },
+    "caps": {
+      "type": "array",
+      "description": "Lista zdolności. Nieznane wartości klient IGNORUJE po cichu.",
+      "items": {
+        "type": "string",
+        "examples": [
+          "power", "brightness", "cct", "rgb", "transition",
+          "segments", "effects", "stream", "pattern"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "cct": {
+      "type": "object",
+      "description": "Obecne gdy caps zawiera 'cct'.",
+      "required": ["min", "max"],
+      "properties": {
+        "min": { "type": "integer", "description": "Najcieplejsza temperatura [K]." },
+        "max": { "type": "integer", "description": "Najzimniejsza temperatura [K]." }
+      }
+    },
+    "geometry": {
+      "type": "object",
+      "description": "Obecne gdy caps zawiera 'rgb'. Podstawa przestrzeni znormalizowanej dla wzorów.",
+      "required": ["type", "count"],
+      "properties": {
+        "type": { "enum": ["strip", "matrix", "custom"] },
+        "count": { "type": "integer", "minimum": 1 },
+        "width": {
+          "type": "integer",
+          "description": "Wymagane dla type=matrix."
+        },
+        "spacing_mm": { "type": "number" },
+        "map": {
+          "description": "Jawne współrzędne znormalizowane dla type=custom. null dla układów regularnych.",
+          "type": ["array", "null"],
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        }
+      }
+    },
+    "stream": {
+      "type": "object",
+      "description": "Obecne gdy caps zawiera 'stream'.",
+      "required": ["proto", "port"],
+      "properties": {
+        "proto": { "enum": ["ddp"] },
+        "port": { "type": "integer", "default": 4048 },
+        "maxFps": { "type": "integer", "default": 60 }
+      }
+    }
+  }
+}

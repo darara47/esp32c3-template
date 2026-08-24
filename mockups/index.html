@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ledctl — makiety aplikacji</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+:root{
+  --surface-0:#f5f4f0; --surface-1:#eceae3; --surface-2:#fff;
+  --text-primary:#1f1e1c; --text-secondary:#5f5e5a; --text-muted:#888780;
+  --border:rgba(0,0,0,.10); --border-strong:rgba(0,0,0,.22);
+  --radius:8px; --success:#1D9E75;
+  --bg-accent:#E6F1FB; --on-accent:#0C447C; --on-accent-d:#042C53;
+  --bg-warning:#FAEEDA; --on-warning:#633806; --on-warning-d:#412402;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --surface-0:#191817; --surface-1:#232220; --surface-2:#2b2a27;
+    --text-primary:#f0efe9; --text-secondary:#b4b2a9; --text-muted:#888780;
+    --border:rgba(255,255,255,.12); --border-strong:rgba(255,255,255,.26);
+    --bg-accent:#0C447C; --on-accent:#B5D4F4; --on-accent-d:#E6F1FB;
+    --bg-warning:#633806; --on-warning:#FAC775; --on-warning-d:#FAEEDA;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;padding:2rem 1.25rem 4rem;background:var(--surface-0);color:var(--text-primary);
+  font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1100px;margin:0 auto}
+h1{font-size:26px;font-weight:500;margin:0 0 .25rem}
+h2{font-size:18px;font-weight:500;margin:2.5rem 0 .35rem}
+.lede{color:var(--text-secondary);font-size:15px;margin:0 0 2rem;max-width:62ch}
+.note{color:var(--text-secondary);font-size:14px;margin:0 0 1rem;max-width:70ch}
+.row{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start}
+.phone{width:300px;background:var(--surface-2);border:.5px solid var(--border);border-radius:18px;padding:14px 12px;flex:0 0 auto}
+.cap{font-size:12px;color:var(--text-muted);margin:0 0 8px;text-align:center}
+.hdr{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.hdr .ti{font-size:18px;color:var(--text-secondary)}
+.title{font-size:16px;font-weight:500;flex:1}
+.card{background:var(--surface-1);border-radius:var(--radius);padding:12px;margin-bottom:8px}
+.card.sel{border:.5px solid var(--border-strong)}
+.rowc{display:flex;align-items:center;gap:10px}
+.nm{margin:0;font-size:14px;font-weight:500}
+.sub{margin:0;font-size:12px;color:var(--text-secondary)}
+.tog{width:38px;height:22px;border-radius:11px;background:var(--success);position:relative;flex:0 0 auto}
+.tog i{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:#fff;display:block}
+.tog.off{background:var(--border)}
+.tog.off i{left:2px;right:auto;background:var(--surface-2)}
+.lbl{margin:0 0 6px;font-size:12px;color:var(--text-secondary)}
+.mut{margin:0 0 8px;font-size:12px;color:var(--text-muted)}
+.track{height:14px;border-radius:7px;background:var(--surface-1);position:relative;margin-bottom:4px}
+.fill{height:14px;border-radius:7px;background:var(--text-primary);opacity:.75}
+.knob{width:22px;height:22px;border-radius:50%;background:var(--surface-2);border:.5px solid var(--border-strong);position:absolute;top:-4px}
+.ends{display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:18px}
+.pill{font-size:11px;background:var(--surface-2);border:.5px solid var(--border);color:var(--text-secondary);padding:3px 8px;border-radius:var(--radius)}
+.btn{flex:1;background:var(--surface-1);border-radius:var(--radius);padding:10px;text-align:center;font-size:12px;color:var(--text-secondary)}
+.btn.pri{background:var(--text-primary);color:var(--surface-2)}
+.dash{border:.5px dashed var(--border-strong);border-radius:var(--radius);padding:10px;text-align:center;font-size:12px;color:var(--text-muted);margin-bottom:14px}
+.strip{height:16px;border-radius:8px}
+.off{opacity:.5}
+.tabs{display:flex;gap:6px;margin-bottom:16px}
+.tab{flex:1;padding:6px;text-align:center;font-size:12px;color:var(--text-secondary);border-radius:var(--radius)}
+.tab.on{background:var(--surface-1);color:var(--text-primary);border:.5px solid var(--border-strong)}
+.sw{width:30px;height:30px;border-radius:50%}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.mini{height:4px;border-radius:2px;background:var(--border);flex:1}
+.mini i{display:block;height:4px;border-radius:2px;background:var(--text-secondary)}
+footer{margin-top:3rem;padding-top:1.25rem;border-top:.5px solid var(--border);font-size:13px;color:var(--text-muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>ledctl — makiety aplikacji</h1>
+<p class="lede">Siedem ekranów aplikacji Flutter. Wszystkie renderowane są przez ten sam ekran urządzenia — różnice wynikają wyłącznie z listy <code>caps</code> w deskryptorze, nie z osobnych widoków.</p>
+
+<h2>1. Lista urządzeń</h2>
+<p class="note">Pasek pod nazwą urządzenia to żywy podgląd aktualnego wzoru. Urządzenie poza zasięgiem nie znika — cache trzyma jego IP i MAC. Sceny są na dole listy, nie w osobnej zakładce.</p>
+<div class="row">
+<div>
+<p class="cap">Lista urządzeń</p>
+<div class="phone">
+  <div class="hdr"><span class="title" style="font-size:18px">Światło</span><i class="ti ti-refresh"></i><i class="ti ti-plus"></i></div>
+
+  <div class="card"><div class="rowc">
+    <i class="ti ti-bulb" style="font-size:20px;color:#BA7517"></i>
+    <div style="flex:1;min-width:0"><p class="nm">Salon – sufit</p><p class="sub">CCT · 3200 K · 45%</p></div>
+    <span class="tog"><i></i></span></div>
+    <div style="height:6px;border-radius:3px;margin-top:10px;background:linear-gradient(90deg,#BA7517,#FAC775,#FAEEDA)"></div>
+  </div>
+
+  <div class="card"><div class="rowc">
+    <i class="ti ti-line-dashed" style="font-size:20px;color:#7F77DD"></i>
+    <div style="flex:1;min-width:0"><p class="nm">Biurko</p><p class="sub">144 px · wzór „Żar”</p></div>
+    <span class="tog"><i></i></span></div>
+    <div style="height:6px;border-radius:3px;margin-top:10px;background:linear-gradient(90deg,#4A1B0C,#D85A30,#EF9F27,#FAC775,#D85A30)"></div>
+  </div>
+
+  <div class="card off"><div class="rowc">
+    <i class="ti ti-plug-connected-x" style="font-size:20px;color:var(--text-muted)"></i>
+    <div style="flex:1;min-width:0"><p class="nm">Sypialnia</p><p class="sub">Poza zasięgiem</p></div></div>
+  </div>
+
+  <p class="mut" style="margin-top:14px">Sceny</p>
+  <div style="display:flex;gap:8px">
+    <div style="flex:1;background:var(--bg-warning);border-radius:var(--radius);padding:10px 8px;text-align:center">
+      <i class="ti ti-sunset-2" style="font-size:18px;color:var(--on-warning)"></i>
+      <p style="margin:4px 0 0;font-size:12px;color:var(--on-warning-d)">Wieczór</p></div>
+    <div style="flex:1;background:var(--surface-1);border-radius:var(--radius);padding:10px 8px;text-align:center">
+      <i class="ti ti-book" style="font-size:18px;color:var(--text-secondary)"></i>
+      <p style="margin:4px 0 0;font-size:12px;color:var(--text-secondary)">Czytanie</p></div>
+    <div style="flex:1;background:var(--surface-1);border-radius:var(--radius);padding:10px 8px;text-align:center">
+      <i class="ti ti-movie" style="font-size:18px;color:var(--text-secondary)"></i>
+      <p style="margin:4px 0 0;font-size:12px;color:var(--text-secondary)">Film</p></div>
+  </div>
+</div>
+</div>
+
+<div>
+<p class="cap">Urządzenie CCT</p>
+<div class="phone">
+  <div class="hdr"><i class="ti ti-chevron-left"></i><span class="title">Salon – sufit</span><i class="ti ti-settings"></i></div>
+  <div style="height:70px;border-radius:12px;margin-bottom:18px;background:linear-gradient(90deg,#FAC775,#FAEEDA,#E6F1FB);display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px">
+    <span style="font-size:13px;color:#412402">3200 K · 45%</span></div>
+
+  <p class="lbl">Temperatura barwowa</p>
+  <div class="track" style="background:linear-gradient(90deg,#BA7517,#FAC775,#FAEEDA,#B5D4F4,#378ADD)"><span class="knob" style="left:32%"></span></div>
+  <div class="ends"><span>2700 K</span><span>6500 K</span></div>
+
+  <p class="lbl">Jasność</p>
+  <div class="track" style="margin-bottom:20px"><div class="fill" style="width:45%"></div><span class="knob" style="left:calc(45% - 11px)"></span></div>
+
+  <p class="mut">Presety</p>
+  <div class="g4" style="margin-bottom:18px">
+    <div style="background:#FAC775;border-radius:var(--radius);padding:8px 4px;text-align:center;font-size:11px;color:#412402">2700</div>
+    <div style="background:#FAEEDA;border-radius:var(--radius);padding:8px 4px;text-align:center;font-size:11px;color:#412402">3500</div>
+    <div style="background:#E6F1FB;border-radius:var(--radius);padding:8px 4px;text-align:center;font-size:11px;color:#042C53">4500</div>
+    <div style="background:#B5D4F4;border-radius:var(--radius);padding:8px 4px;text-align:center;font-size:11px;color:#042C53">6500</div>
+  </div>
+
+  <div style="border-top:.5px solid var(--border);padding-top:12px" class="rowc">
+    <i class="ti ti-clock" style="font-size:16px;color:var(--text-secondary)"></i>
+    <span style="flex:1;font-size:13px;color:var(--text-secondary)">Wschód słońca · 6:30</span>
+    <span style="font-size:12px;color:var(--success)">Wł.</span></div>
+</div>
+</div>
+</div>
+
+<h2>2. Piksele i edytor wzorów</h2>
+<p class="note">Warstwy w edytorze są przeciągalne, modulatory to pigułki pod generatorem. „Testuj” streamuje po DDP z telefonu — natychmiast, ale gaśnie po wyjściu. „Wyślij na pasek” zapisuje JSON do LittleFS i wzór żyje samodzielnie.</p>
+<div class="row">
+<div>
+<p class="cap">Urządzenie adresowalne</p>
+<div class="phone">
+  <div class="hdr"><i class="ti ti-chevron-left"></i><span class="title">Biurko</span><i class="ti ti-settings"></i></div>
+  <div class="strip" style="margin-bottom:14px;background:linear-gradient(90deg,#4A1B0C,#993C1D,#D85A30,#EF9F27,#FAC775,#EF9F27,#D85A30)"></div>
+
+  <div class="tabs"><span class="tab on">Kolor</span><span class="tab">Efekty</span><span class="tab">Wzory</span><span class="tab">Segm.</span></div>
+
+  <div style="display:flex;justify-content:center;margin-bottom:16px">
+    <div style="width:170px;height:170px;border-radius:50%;position:relative;background:conic-gradient(#E24B4A,#EF9F27,#97C459,#1D9E75,#378ADD,#7F77DD,#D4537E,#E24B4A)">
+      <div style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.92) 8%,rgba(255,255,255,0) 62%)"></div>
+      <div style="width:26px;height:26px;border-radius:50%;background:#EF9F27;border:2.5px solid #fff;position:absolute;top:38px;left:112px"></div>
+    </div></div>
+
+  <div style="display:flex;gap:6px;margin-bottom:16px;justify-content:center">
+    <span class="sw" style="background:#D85A30"></span><span class="sw" style="background:#EF9F27"></span>
+    <span class="sw" style="background:#1D9E75"></span><span class="sw" style="background:#378ADD"></span>
+    <span class="sw" style="background:#7F77DD"></span>
+    <span class="sw" style="border:.5px dashed var(--border-strong);display:flex;align-items:center;justify-content:center"><i class="ti ti-plus" style="font-size:14px;color:var(--text-muted)"></i></span>
+  </div>
+
+  <p class="lbl">Jasność · 62%</p>
+  <div class="track" style="margin-bottom:14px"><div class="fill" style="width:62%"></div><span class="knob" style="left:calc(62% - 11px)"></span></div>
+
+  <div style="background:var(--bg-accent);border-radius:var(--radius);padding:10px" class="rowc">
+    <i class="ti ti-music" style="font-size:16px;color:var(--on-accent)"></i>
+    <span style="flex:1;font-size:12px;color:var(--on-accent-d)">Tryb muzyczny</span>
+    <span style="font-size:11px;color:var(--on-accent)">DDP · 60 fps</span></div>
+</div>
+</div>
+
+<div>
+<p class="cap">Edytor wzorów</p>
+<div class="phone">
+  <div class="hdr"><i class="ti ti-chevron-left"></i><span class="title">Żar</span><i class="ti ti-device-floppy"></i></div>
+  <div style="height:44px;border-radius:var(--radius);margin-bottom:4px;background:linear-gradient(90deg,#4A1B0C,#993C1D,#D85A30,#EF9F27,#FAC775,#EF9F27,#D85A30,#993C1D)"></div>
+  <p style="margin:0 0 14px;font-size:11px;color:var(--text-muted);text-align:center">Podgląd · 144 px · 60 fps</p>
+
+  <p class="mut">Warstwy</p>
+
+  <div class="card sel">
+    <div class="rowc" style="margin-bottom:8px">
+      <i class="ti ti-grip-vertical" style="font-size:16px;color:var(--text-muted)"></i>
+      <span style="flex:1;font-size:13px;font-weight:500">noise</span>
+      <span style="font-size:11px;background:var(--bg-accent);color:var(--on-accent);padding:2px 8px;border-radius:var(--radius)">screen 35%</span></div>
+    <div style="margin-bottom:8px"><span class="pill">time · 0.4</span></div>
+    <div class="rowc"><span style="font-size:11px;color:var(--text-secondary);width:38px">scale</span>
+      <span class="mini"><i style="width:45%"></i></span>
+      <span style="font-size:11px;width:22px;text-align:right">3.0</span></div>
+  </div>
+
+  <div class="card">
+    <div class="rowc" style="margin-bottom:8px">
+      <i class="ti ti-grip-vertical" style="font-size:16px;color:var(--text-muted)"></i>
+      <span style="flex:1;font-size:13px;font-weight:500">gradient</span>
+      <span style="font-size:11px;color:var(--text-muted)">normal 100%</span></div>
+    <div style="height:12px;border-radius:6px;background:linear-gradient(90deg,#D85A30,#FAC775);margin-bottom:8px"></div>
+    <span class="pill">scroll · 0.15</span>
+  </div>
+
+  <div class="dash"><i class="ti ti-plus" style="font-size:14px;vertical-align:-2px"></i> Dodaj warstwę</div>
+  <div style="display:flex;gap:8px"><span class="btn">Testuj</span><span class="btn pri">Wyślij na pasek</span></div>
+</div>
+</div>
+</div>
+
+<h2>3. Scena wielourządzeniowa</h2>
+<p class="note">Wyzwolenie sceny z jednym urządzeniem offline działa dla pozostałych i po cichu pomija brakujące. <strong>Uwaga na wyzwalacze</strong> — „zachód słońca −30 min” musi zadziałać przy wyłączonym telefonie, a scena mieszka w aplikacji. To realna decyzja do podjęcia przed M3, patrz roadmapa.</p>
+<div class="row">
+<div>
+<p class="cap">Edytor sceny</p>
+<div class="phone">
+  <div class="hdr"><i class="ti ti-chevron-left"></i><span class="title">Wieczór</span><i class="ti ti-trash"></i></div>
+  <div style="background:var(--bg-warning);border-radius:12px;padding:14px;margin-bottom:16px;text-align:center">
+    <i class="ti ti-sunset-2" style="font-size:28px;color:var(--on-warning)"></i>
+    <p style="margin:6px 0 0;font-size:13px;color:var(--on-warning-d)">2 urządzenia · przejście 3 s</p></div>
+
+  <p class="mut">Urządzenia w scenie</p>
+
+  <div class="card">
+    <div class="rowc" style="margin-bottom:10px"><i class="ti ti-bulb" style="font-size:18px;color:#BA7517"></i>
+      <span style="flex:1;font-size:13px;font-weight:500">Salon – sufit</span>
+      <i class="ti ti-check" style="font-size:16px;color:var(--success)"></i></div>
+    <div style="height:24px;border-radius:var(--radius);background:linear-gradient(90deg,#BA7517,#FAC775);margin-bottom:8px"></div>
+    <div style="display:flex;gap:6px"><span class="pill">2700 K</span><span class="pill">40%</span></div>
+  </div>
+
+  <div class="card">
+    <div class="rowc" style="margin-bottom:10px"><i class="ti ti-line-dashed" style="font-size:18px;color:#7F77DD"></i>
+      <span style="flex:1;font-size:13px;font-weight:500">Biurko</span>
+      <i class="ti ti-check" style="font-size:16px;color:var(--success)"></i></div>
+    <div style="height:24px;border-radius:var(--radius);background:linear-gradient(90deg,#4A1B0C,#993C1D,#D85A30,#EF9F27,#D85A30);margin-bottom:8px"></div>
+    <div style="display:flex;gap:6px"><span class="pill">wzór „Żar”</span><span class="pill">60%</span></div>
+  </div>
+
+  <div class="card off"><div class="rowc">
+    <i class="ti ti-plug-connected-x" style="font-size:18px;color:var(--text-muted)"></i>
+    <span style="flex:1;font-size:13px">Sypialnia</span>
+    <span style="width:18px;height:18px;border-radius:4px;border:.5px solid var(--border-strong)"></span></div></div>
+
+  <p class="lbl" style="margin-top:14px">Czas przejścia · 3.0 s</p>
+  <div class="track" style="margin-bottom:18px"><div class="fill" style="width:30%"></div><span class="knob" style="left:calc(30% - 11px)"></span></div>
+
+  <p class="mut">Wyzwalacze</p>
+  <div class="card rowc"><i class="ti ti-clock" style="font-size:16px;color:var(--text-secondary)"></i>
+    <span style="flex:1;font-size:12px">Zachód słońca −30 min</span>
+    <span class="tog" style="width:34px;height:20px"><i style="width:16px;height:16px"></i></span></div>
+  <div class="card rowc" style="margin-bottom:16px"><i class="ti ti-map-pin" style="font-size:16px;color:var(--text-secondary)"></i>
+    <span style="flex:1;font-size:12px">Po powrocie do domu</span>
+    <span class="tog off" style="width:34px;height:20px"><i style="width:16px;height:16px"></i></span></div>
+
+  <div style="display:flex;gap:8px"><span class="btn">Podejrzyj</span><span class="btn pri">Zapisz scenę</span></div>
+</div>
+</div>
+
+<div>
+<p class="cap">Parowanie (BLE provisioning)</p>
+<div class="phone">
+  <div class="hdr"><i class="ti ti-x"></i><span class="title">Nowe urządzenie</span></div>
+
+  <div style="display:flex;gap:8px;margin-bottom:20px">
+    <span style="flex:1;height:3px;border-radius:2px;background:var(--text-primary)"></span>
+    <span style="flex:1;height:3px;border-radius:2px;background:var(--text-primary)"></span>
+    <span style="flex:1;height:3px;border-radius:2px;background:var(--border)"></span>
+    <span style="flex:1;height:3px;border-radius:2px;background:var(--border)"></span>
+  </div>
+
+  <p style="margin:0 0 4px;font-size:15px;font-weight:500">Podaj hasło WiFi</p>
+  <p style="margin:0 0 18px;font-size:13px;color:var(--text-secondary)">Hasło trafi do urządzenia szyfrowanym kanałem BLE i nie opuści Twojej sieci.</p>
+
+  <div class="card rowc" style="margin-bottom:14px">
+    <i class="ti ti-bluetooth" style="font-size:18px;color:var(--success)"></i>
+    <div style="flex:1;min-width:0"><p class="nm">PROV_3A9F21</p><p class="sub">ledctl-pixels · połączono</p></div>
+  </div>
+
+  <p class="lbl">Sieć</p>
+  <div style="background:var(--surface-1);border-radius:var(--radius);padding:10px 12px;margin-bottom:10px" class="rowc">
+    <i class="ti ti-wifi" style="font-size:16px;color:var(--text-secondary)"></i>
+    <span style="flex:1;font-size:13px">DomowaSiec_5G</span>
+    <i class="ti ti-chevron-down" style="font-size:16px;color:var(--text-muted)"></i></div>
+
+  <p class="lbl">Hasło</p>
+  <div style="background:var(--surface-1);border-radius:var(--radius);padding:10px 12px;margin-bottom:16px" class="rowc">
+    <span style="flex:1;font-size:13px;letter-spacing:2px">••••••••••</span>
+    <i class="ti ti-eye" style="font-size:16px;color:var(--text-muted)"></i></div>
+
+  <div style="background:var(--bg-accent);border-radius:var(--radius);padding:10px;margin-bottom:16px" class="rowc">
+    <i class="ti ti-info-circle" style="font-size:16px;color:var(--on-accent)"></i>
+    <span style="flex:1;font-size:12px;color:var(--on-accent-d)">Sieci 5 GHz nie są obsługiwane — wybierz pasmo 2,4 GHz</span></div>
+
+  <span class="btn pri" style="display:block">Połącz</span>
+</div>
+</div>
+</div>
+
+<h2>4. Edytor segmentów</h2>
+<p class="note">Segmenty dzielą jeden fizyczny pasek na niezależnie sterowane odcinki. Zakresy nie mogą się nakładać — walidacja po stronie aplikacji, zanim patch pójdzie na urządzenie.</p>
+<div class="row">
+<div>
+<p class="cap">Segmenty</p>
+<div class="phone">
+  <div class="hdr"><i class="ti ti-chevron-left"></i><span class="title">Biurko · segmenty</span><i class="ti ti-plus"></i></div>
+
+  <div style="display:flex;height:34px;border-radius:var(--radius);overflow:hidden;margin-bottom:6px">
+    <div style="flex:50;background:linear-gradient(90deg,#993C1D,#D85A30)"></div>
+    <div style="flex:30;background:#1D9E75"></div>
+    <div style="flex:20;background:var(--surface-1)"></div>
+  </div>
+  <div style="display:flex;font-size:11px;color:var(--text-muted);margin-bottom:18px">
+    <span style="flex:50">0</span><span style="flex:30">72</span><span style="flex:20;text-align:right">144</span></div>
+
+  <div class="card sel">
+    <div class="rowc" style="margin-bottom:8px">
+      <span style="width:10px;height:10px;border-radius:3px;background:#D85A30"></span>
+      <span style="flex:1;font-size:13px;font-weight:500">Górna półka</span>
+      <span class="tog" style="width:34px;height:20px"><i style="width:16px;height:16px"></i></span></div>
+    <div style="display:flex;gap:6px;margin-bottom:10px"><span class="pill">0 – 72</span><span class="pill">wzór „Żar”</span></div>
+    <div class="rowc"><span style="font-size:11px;color:var(--text-secondary);width:44px">jasność</span>
+      <span class="mini"><i style="width:70%"></i></span>
+      <span style="font-size:11px;width:28px;text-align:right">70%</span></div>
+  </div>
+
+  <div class="card">
+    <div class="rowc" style="margin-bottom:8px">
+      <span style="width:10px;height:10px;border-radius:3px;background:#1D9E75"></span>
+      <span style="flex:1;font-size:13px;font-weight:500">Blat</span>
+      <span class="tog" style="width:34px;height:20px"><i style="width:16px;height:16px"></i></span></div>
+    <div style="display:flex;gap:6px"><span class="pill">72 – 115</span><span class="pill">solid</span></div>
+  </div>
+
+  <div class="card">
+    <div class="rowc" style="margin-bottom:8px">
+      <span style="width:10px;height:10px;border-radius:3px;background:var(--border-strong)"></span>
+      <span style="flex:1;font-size:13px;font-weight:500">Reszta</span>
+      <span class="tog off" style="width:34px;height:20px"><i style="width:16px;height:16px"></i></span></div>
+    <div style="display:flex;gap:6px"><span class="pill">115 – 144</span><span class="pill">wyłączony</span></div>
+  </div>
+
+  <div class="dash" style="margin-top:6px"><i class="ti ti-plus" style="font-size:14px;vertical-align:-2px"></i> Nowy segment</div>
+  <span class="btn pri" style="display:block">Zastosuj</span>
+</div>
+</div>
+
+<div style="max-width:420px">
+<p class="cap" style="text-align:left">Notatki implementacyjne</p>
+<div style="background:var(--surface-2);border:.5px solid var(--border);border-radius:12px;padding:1rem 1.25rem;font-size:14px">
+<p style="margin:0 0 .75rem"><strong style="font-weight:500">Ekran urządzenia to jedna klasa.</strong> Różnica między CCT a pikselami nie wynika z dwóch widoków — to ten sam <code>device_screen.dart</code> renderujący inny zestaw widgetów z rejestru <code>caps</code>. Jeśli implementacja wymaga rozgałęzienia po typie urządzenia, model zdolności jest zepsuty.</p>
+<p style="margin:0 0 .75rem"><strong style="font-weight:500">Nagłówek jako podgląd.</strong> Każdy ekran ma u góry pasek pokazujący aktualny stan. Renderowany tym samym <code>PatternRenderer</code>, który napędza symulator — jedno źródło prawdy dla trzech konsumentów.</p>
+<p style="margin:0 0 .75rem"><strong style="font-weight:500">Suwaki.</strong> Throttling do 25 Hz w trakcie przeciągania, pełna wartość wysyłana po <code>onChangeEnd</code>. Reconciliation z urządzeniem dopiero po 300 ms bezczynności, inaczej echo szarpie suwakiem.</p>
+<p style="margin:0"><strong style="font-weight:500">Parowanie.</strong> ESP32-C3 nie obsługuje 5 GHz. Ostrzeżenie musi pojawić się <em>przed</em> próbą połączenia — inaczej użytkownik dostanie tylko timeout bez wyjaśnienia.</p>
+</div>
+</div>
+</div>
+
+<footer>ledctl · makiety statyczne, bez interakcji · otwórz w przeglądarce, obsługuje tryb ciemny systemu</footer>
+
+</div>
+</body>
+</html>

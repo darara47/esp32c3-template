@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ledctl.local/schema/state.schema.json",
+  "title": "Device state",
+  "description": "Stan urządzenia. Ten sam kształt służy jako patch — wszystkie pola opcjonalne, semantyka JSON merge patch.",
+  "type": "object",
+  "properties": {
+    "on":  { "type": "boolean" },
+    "bri": {
+      "type": "integer", "minimum": 0, "maximum": 255,
+      "description": "Jasność percepcyjna (liniowa dla oka). Gamma stosowana WYŁĄCZNIE w firmware."
+    },
+    "tt": {
+      "type": "integer", "minimum": 0, "maximum": 60000,
+      "description": "Czas przejścia [ms] dla tego patcha."
+    },
+
+    "cct": {
+      "type": "integer",
+      "description": "Temperatura barwowa [K]. Interpolacja przejść w miredach, nie w kelwinach."
+    },
+
+    "col": {
+      "type": "array", "minItems": 3, "maxItems": 3,
+      "items": { "type": "integer", "minimum": 0, "maximum": 255 }
+    },
+    "fx":  { "type": "integer", "description": "Id efektu wbudowanego." },
+    "sx":  { "type": "integer", "minimum": 0, "maximum": 255, "description": "Prędkość efektu." },
+    "ix":  { "type": "integer", "minimum": 0, "maximum": 255, "description": "Intensywność efektu." },
+    "pal": { "type": "integer", "description": "Id palety." },
+
+    "seg": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id":    { "type": "integer", "minimum": 0 },
+          "start": { "type": "integer", "minimum": 0 },
+          "stop":  { "type": "integer", "minimum": 0, "description": "Wyłącznie (exclusive)." },
+          "on":    { "type": "boolean" },
+          "bri":   { "type": "integer", "minimum": 0, "maximum": 255 },
+          "col":   { "$ref": "#/properties/col" },
+          "fx":    { "type": "integer" }
+        }
+      }
+    },
+
+    "pattern": {
+      "type": ["string", "null"],
+      "description": "Id aktywnego wzoru z LittleFS. null = brak."
+    },
+
+    "live": {
+      "type": "boolean",
+      "readOnly": true,
+      "description": "true gdy urządzenie odbiera strumień DDP; fx i pattern są wtedy ignorowane. Ustawiane wyłącznie przez firmware, wraca na false po 2500 ms bez pakietów."
+    }
+  }
+}

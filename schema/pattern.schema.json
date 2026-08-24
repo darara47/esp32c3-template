@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ledctl.local/schema/pattern.schema.json",
+  "title": "Pattern",
+  "description": "Deklaratywny wzór. Renderowany dwukrotnie: w Dart (podgląd w edytorze) i w C (wykonanie na urządzeniu). Obie implementacje MUSZĄ dawać identyczny wynik — patrz tools/pattern_conformance/.",
+  "type": "object",
+  "required": ["schema", "id", "layers"],
+  "properties": {
+    "schema": { "type": "integer", "minimum": 1 },
+    "id": { "type": "string", "pattern": "^[a-z0-9-]{1,32}$" },
+    "name": { "type": "string", "maxLength": 64 },
+    "layers": {
+      "type": "array",
+      "description": "Warstwy renderowane od dołu (indeks 0) do góry.",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/layer" }
+    }
+  },
+  "$defs": {
+    "color": {
+      "type": "string",
+      "pattern": "^#[0-9a-fA-F]{6}$"
+    },
+    "layer": {
+      "type": "object",
+      "required": ["src"],
+      "properties": {
+        "src": { "$ref": "#/$defs/generator" },
+        "mod": {
+          "type": "array",
+          "maxItems": 4,
+          "items": { "$ref": "#/$defs/modulator" }
+        },
+        "blend": {
+          "enum": ["normal", "add", "screen", "multiply"],
+          "default": "normal"
+        },
+        "opacity": { "type": "number", "minimum": 0, "maximum": 1, "default": 1 }
+      }
+    },
+    "generator": {
+      "type": "object",
+      "required": ["type"],
+      "description": "Kontrakt: color sample(float x, float y, float t), gdzie x,y w [0,1], t w sekundach.",
+      "oneOf": [
+        {
+          "properties": {
+            "type": { "const": "solid" },
+            "color": { "$ref": "#/$defs/color" }
+          },
+          "required": ["color"]
+        },
+        {
+          "properties": {
+            "type": { "const": "gradient" },
+            "stops": {
+              "type": "array",
+              "minItems": 2,
+              "description": "Interpolacja w OkLab, nie w sRGB.",
+              "items": {
+                "type": "array",
+                "minItems": 2, "maxItems": 2,
+                "prefixItems": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "$ref": "#/$defs/color" }
+                ]
+              }
+            }
+          },
+          "required": ["stops"]
+        },
+        {
+          "properties": {
+            "type": { "const": "palette" },
+            "id": { "type": "integer" },
+            "spread": { "type": "number", "default": 1 }
+          },
+          "required": ["id"]
+        },
+        {
+          "properties": {
+            "type": { "const": "noise" },
+            "scale": { "type": "number", "default": 3 },
+            "octaves": { "type": "integer", "minimum": 1, "maximum": 4, "default": 1 }
+          }
+        },
+        {
+          "properties": {
+            "type": { "const": "sparkle" },
+            "color": { "$ref": "#/$defs/color" },
+            "density": { "type": "number", "minimum": 0, "maximum": 1 },
+            "decay": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        {
+          "properties": {
+            "type": { "const": "comet" },
+            "color": { "$ref": "#/$defs/color" },
+            "len": { "type": "number", "minimum": 0, "maximum": 1 },
+            "pos": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        {
+          "properties": {
+            "type": { "const": "plasma" },
+            "scale": { "type": "number", "default": 2 },
+            "hueShift": { "type": "number", "default": 0 }
+          }
+        }
+      ]
+    },
+    "modulator": {
+      "type": "object",
+      "required": ["type"],
+      "oneOf": [
+        {
+          "properties": {
+            "type": { "const": "scroll" },
+            "speed": { "type": "number", "description": "Obroty na sekundę w przestrzeni znormalizowanej." }
+          },
+          "required": ["speed"]
+        },
+        {
+          "properties": {
+            "type": { "const": "time" },
+            "speed": { "type": "number" }
+          },
+          "required": ["speed"]
+        },
+        {
+          "properties": {
+            "type": { "const": "pulse" },
+            "freq": { "type": "number" },
+            "depth": { "type": "number", "minimum": 0, "maximum": 1 },
+            "shape": { "enum": ["sine", "triangle", "square"], "default": "sine" }
+          }
+        },
+        {
+          "properties": {
+            "type": { "const": "mirror" },
+            "axis": { "enum": ["x", "y"], "default": "x" }
+          }
+        },
+        {
+          "properties": {
+            "type": { "const": "wave" },
+            "freq": { "type": "number" },
+            "amp": { "type": "number" }
+          }
+        },
+        {
+          "properties": {
+            "type": { "const": "clamp" },
+            "min": { "type": "number" },
+            "max": { "type": "number" }
+          }
+        },
+        {
+          "properties": {
+            "type": { "const": "hue" },
+            "shift": { "type": "number", "description": "Przesunięcie barwy w stopniach." }
+          }
+        },
+        {
+          "properties": {
+            "type": { "const": "audio" },
+            "band": { "enum": ["low", "mid", "high"] },
+            "gain": { "type": "number", "default": 1 }
+          },
+          "required": ["band"]
+        }
+      ]
+    }
+  }
+}

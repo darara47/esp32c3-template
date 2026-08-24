@@ -1,0 +1,37 @@
+# See docs/04-firmware.md#sdkconfigdefaults for rationale.
+CONFIG_IDF_TARGET="esp32c3"
+CONFIG_COMPILER_OPTIMIZATION_PERF=y
+
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=6144
+CONFIG_FREERTOS_HZ=1000
+
+CONFIG_HTTPD_WS_SUPPORT=y
+CONFIG_HTTPD_MAX_REQ_HDR_LEN=1024
+# Needed so the server can register the client and push the initial
+# device/state frames right after the WS handshake — the framework doesn't
+# call uri->handler() for the handshake request itself. See ledctl_ws.c.
+CONFIG_HTTPD_WS_POST_HANDSHAKE_CB_SUPPORT=y
+# Lets ws_pre_handshake_cb reject an unauthorized client before the 101
+# response goes out — see ledctl_ws.c's auth check.
+CONFIG_HTTPD_WS_PRE_HANDSHAKE_CB_SUPPORT=y
+
+CONFIG_ESP_TASK_WDT_TIMEOUT_S=10
+
+# A/B OTA partitions with rollback — see docs/04-firmware.md#ota and
+# partitions.csv. The board's flash is actually 4MB even though earlier
+# bring-up left the image header claiming 2MB.
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
+CONFIG_ESPTOOLPY_FLASHSIZE="4MB"
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y
+
+# Power management scales the CPU clock, which is irrelevant here (no
+# frame-rate-sensitive rendering on the CCT firmware) but left off anyway to
+# keep behavior predictable while bringing the board up.
+CONFIG_PM_ENABLE=n
+
+# BLE provisioning (docs/04-firmware.md#provisioning-ble) — ESP32-C3 has no
+# classic-BT radio, so NimBLE (BLE-only) is the stack, not Bluedroid.
+CONFIG_BT_ENABLED=y
+CONFIG_BT_NIMBLE_ENABLED=y

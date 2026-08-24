@@ -1,0 +1,50 @@
+menu "ledctl CCT Configuration"
+
+    config LEDCTL_PROV_POP
+        string "BLE provisioning proof-of-possession"
+        default "abcd1234"
+        help
+            Shared secret the app must present before the WiFi credential
+            exchange proceeds (Security1: X25519 + this PoP + AES-CTR) — see
+            docs/04-firmware.md#provisioning-ble. A fixed value baked into
+            every device is fine for a private/single-user build; a product
+            for other people needs one unique per device (e.g. from a
+            manufacturing partition or printed on the enclosure), since
+            anyone who knows it can pair with any un-provisioned unit in BLE
+            range.
+
+    config LEDCTL_PROV_RESET_GPIO
+        int "Provisioning reset button GPIO"
+        default 9
+        help
+            Held low (BOOT button, active-low) for 5s, wipes the stored WiFi
+            provisioning and reboots into BLE pairing mode. GPIO9 is the BOOT
+            button on most ESP32-C3 dev boards.
+
+    config LEDCTL_DEVICE_NAME
+        string "Device name"
+        default "ledctl-cct"
+        help
+            Shown in the app's device list and used as the mDNS instance
+            name. Rename per-device once you have more than one.
+
+    config LEDCTL_CCT_MIN_K
+        int "Minimum color temperature (K, warmest)"
+        default 2700
+
+    config LEDCTL_CCT_MAX_K
+        int "Maximum color temperature (K, coldest)"
+        default 6500
+
+    config LEDCTL_WARM_GPIO
+        int "Warm channel PWM GPIO"
+        default 4
+        help
+            LEDC channel 0. Defaults match docs/06-hardware.md's suggested
+            GPIO assignment for a typical ESP32-C3 dev board.
+
+    config LEDCTL_COLD_GPIO
+        int "Cold channel PWM GPIO"
+        default 5
+
+endmenu

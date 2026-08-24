@@ -1,0 +1,16 @@
+name: ledctl
+publish_to: none
+
+environment:
+  sdk: ^3.13.1
+
+workspace:
+  - app
+  - sim
+  - packages/led_core
+
+dev_dependencies:
+  melos: ^8.3.0
+
+melos:
+  name: ledctl
